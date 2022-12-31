@@ -1,5 +1,7 @@
 from bs4 import BeautifulSoup
 
+import requests
+
 from selenium import webdriver
 
 from selenium.webdriver.chrome.service import Service
@@ -55,25 +57,45 @@ items = soup.select(
     "#content > div > ul > li > div > h3 > a")
 
 book_list = []
+book_detail_list = []
 
 for e, item in enumerate(items, 1):
 
     book_dict = {}
-    book_thumb = soup.select_one("#content > div > ul > li > a > img")["src"]
-    book_index = e
+    # book_thumb = soup.select_one("#content > div > ul > li > a > img")["src"]
     book_dict['index'] = e
     book_dict['title'] = item.text
     book_url_pre = item.get('href')
     book_id = book_url_pre[31:38].replace("?", "")
+    book_dict['id'] = book_id
     book_url = f"https://series.naver.com/novel/detail.series?productNo={book_id}"
-    book_dict['thumbs'] = book_thumb
+    # book_dict['thumbs'] = book_thumb
     book_dict['url'] = book_url
 
     book_list.append(book_dict)
 
+for idx, book in enumerate(book_list, 1):
+    book_detail_dict = {}
+    book_detail_url = book['url']
 
-print(book_list)
+    res2 = requests.get(book_detail_url, headers=req_header_dict)
+    # print(res.status_code)
+    soup2 = BeautifulSoup(res2.text, 'html.parser')
+
+    book_detail_dict['index'] = book['index']
+    book_detail_dict['title'] = book['title']
+    book_detail_dict['id'] = book['id']
+    book_detail_dict['url'] = book['url']
+
+    book_thumbs = soup2.select_one(
+        "#container > div.aside.NE\=a\:nvi > a > img")['src']
+
+    book_detail_dict['thumb'] = book_thumbs
+    book_detail_list.append(book_detail_dict)
+
+print(book_detail_list)
+
 with open('series_rf_top25.json', 'w', encoding='utf-8') as file:
-    json.dump(book_list, file, ensure_ascii=False)
+    json.dump(book_detail_list, file, ensure_ascii=False)
 
 driver.quit()
