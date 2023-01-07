@@ -1,7 +1,6 @@
 from bs4 import BeautifulSoup
-
 import requests
-
+import re
 import json
 
 url = 'https://series.naver.com/novel/categoryProductList.series?categoryTypeCode=genre&genreCode=207&orderTypeCode=new&is&isFinished=false'
@@ -39,7 +38,15 @@ for book, book_thumb, book_star, author in zip(books, book_thumbs, book_stars, b
     book_url = f"https://series.naver.com/novel/detail.series?productNo={book_id}"
     book_dict['id'] = book_id
     book_dict['index'] = rank
-    book_dict['title'] = book.text
+    a = book.text.replace("독점", "")
+    a = a.replace("미완결", "")
+    a = a.replace("단행본", "")
+    a = a.replace("선공개", "")
+    a = a.replace("[", "")
+    a = a.replace("]", "")
+    a = a.replace("/", "")
+
+    book_dict['title'] = a
     book_dict['url'] = book_url
     book_dict['thumb'] = book_thumb.get('src')
     book_dict['star'] = book_star.text
