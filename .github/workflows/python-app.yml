@@ -3,9 +3,7 @@
 
 name: Python application
 
-on:
-  schedule:
-    - cron: '*/10 * * * *'
+
 
 jobs:
   build:
